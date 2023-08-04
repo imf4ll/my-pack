@@ -10,21 +10,17 @@ class PackageWidget extends StatelessWidget {
   final String? name;
   final String? id;
   final String? description;
-  final int? created;
+  final String? lastUpdate;
   final bool? delivered;
-  final Icon? icon;
 
   const PackageWidget({
     super.key,
     this.name,
     this.id,
     this.description,
-    this.created,
     this.delivered,
-    this.icon,
+    this.lastUpdate,
   });
-
-  final String lastUpdate = 'há 3 horas';
 
   @override
   Widget build(context) {
@@ -37,34 +33,24 @@ class PackageWidget extends StatelessWidget {
           borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
         ),
         backgroundColor: DarkTheme.background,
+        isScrollControlled: true,
         builder: (context) {
           return BottomSheet(
             onClosing: () => {},
-            constraints: const BoxConstraints(maxHeight: 120),
+            constraints: const BoxConstraints(maxHeight: 60),
             backgroundColor: Colors.transparent,
             builder: (context) {
               return Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () => print('edit'),
-                    child: const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 24, color: DarkTheme.iconPrimary),
-                          SizedBox(width: 10),
-                          Text('Edit', style: TextStyle(fontWeight: FontWeight.w500, color: DarkTheme.secondary, fontSize: 18)),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 5),
                   GestureDetector(
                     onTap: () {
                       packagesController.removePackage(id!);
 
                       Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully removed.')));
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(12),
@@ -85,32 +71,15 @@ class PackageWidget extends StatelessWidget {
       );
     }
 
-    String since(int timestamp) {
-      double since = (DateTime.now().millisecondsSinceEpoch - timestamp) / 1000 / 60;
-
-      switch (since) {
-        case < 60:
-          return 'Criado há ${ since.round() } minutos';
-
-        default:
-          return 'Criado há ${ (since / 24).round() } dias';
-      }
-    }
-
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) =>
-          PackagePage(
-              name: name,
-              id: id,
-              created: since(created!),
-            )
-          )
+          PackagePage(name: name, id: id)),
         );
       },
       onLongPress: () => showPackageModal(),
       child: Card(
-        color: const Color(0xFF222222),
+        color: DarkTheme.cardBackground,
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Column(
@@ -125,23 +94,31 @@ class PackageWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                'Objeto em trânsito, por favor aguarde',
-                //description!,
-                style: const TextStyle(
-                  color: DarkTheme.primary,
-                  fontSize: 15,
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: icon,
+              Row(
+                children: [
+                  Expanded(
+                    flex: 20,
+                    child: Text(
+                      description!,
+                      style: const TextStyle(
+                        color: DarkTheme.primary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Spacer(),
+                  delivered! ? const Icon(Icons.check_circle, color: DarkTheme.iconPrimary) : const Icon(Icons.pending, color: DarkTheme.iconPrimary),
+                ],
               ),
               const SizedBox(height: 15),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  lastUpdate,
+                  lastUpdate!,
                   style: const TextStyle(
                     color: DarkTheme.terciary,
                     fontSize: 13,

@@ -57,14 +57,12 @@ class _SearchPageState extends State<SearchPage> {
       body: ListView(
         padding: const EdgeInsets.all(5),
         children: [
-           for (var package in packagesController.packages.reversed.where((i) => i.name!.toLowerCase().contains(query) || i.id!.toLowerCase().contains(query)))
+           for (var package in packagesController.packages.reversed.where((i) => i['name']!.toLowerCase().contains(query) || i['id'].toLowerCase().contains(query)))
             PackageWidget(
-              name: package.name,
-              id: package.id,
-              description: package.description,
-              created: package.created,
-              delivered: package.delivered,
-              icon: const Icon(Icons.pending, color: DarkTheme.iconPrimary),
+              name: package['name'],
+              id: package['id'],
+              description: package['description'],
+              delivered: package['delivered'],
             ),
         ],
       ),

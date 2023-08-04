@@ -11,6 +11,8 @@ import '../widgets/empty_widget.dart';
 
 import '../themes/dark_theme.dart';
 
+import '../services/storage_service.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({ super.key });
 
@@ -22,17 +24,21 @@ class _HomePageState extends State<HomePage> {
   var packagesController = PackagesController.instance;
   var homePageController = HomePageController.instance;
 
+  List packages = [];
+
   @override
-    void initState() {
-      super.initState();
+  void initState() {
+    //clearStorage();
+    createStorage();
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (packagesController.packages.isEmpty) {
-          showAddModal();
+    getPackages().then((r) => setState(() {
+      packages = r!;
 
-        }
-      });
-    }
+      packagesController.setPackages(r);
+    }));
+
+    super.initState();
+  }
 
   void showAddModal() {
     showModalBottomSheet(
@@ -47,7 +53,7 @@ class _HomePageState extends State<HomePage> {
           padding: MediaQuery.of(context).viewInsets,
           child: BottomSheet(
             onClosing: () => {},
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.32),
+            constraints: const BoxConstraints(maxHeight: 275),
             backgroundColor: Colors.transparent,
             builder: (context) {
               return Container(
@@ -56,24 +62,25 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.only(top: 20),
                   child: Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 20),
-                          child: Row(
+                      Container(
+                        alignment: Alignment.topLeft,
+                        padding: const EdgeInsets.only(left: 20),
+                        child: const Row(
                           children: [
-                            Icon(Icons.inventory_2, color: DarkTheme.iconPrimary, size: 28),
+                            Icon(Icons.local_shipping_rounded, color: DarkTheme.iconPrimary, size: 32),
                             SizedBox(width: 10),
-                            Text('Add package', style: TextStyle(color: DarkTheme.secondary, fontWeight: FontWeight.w600, fontSize: 18)),
-                          ],
+                            Text('Add package', style: TextStyle(color: DarkTheme.primary, fontWeight: FontWeight.w600, fontSize: 18)),
+                          ],  
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
                       Padding(
                         padding: const EdgeInsets.only(left: 40, right: 40),
                         child: Column(
                           children: [
                             TextField(
                               decoration: const InputDecoration(
-                              hintText: 'Name',
+                              hintText: 'Description',
                                 hintStyle: TextStyle(
                                   color: DarkTheme.terciary,
                                 ),
@@ -88,10 +95,10 @@ class _HomePageState extends State<HomePage> {
                               onChanged: (value) => setState(() => homePageController.packageName = value),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 10),
                             TextField(
                               decoration: const InputDecoration(
-                                hintText: 'Package ID',
+                                hintText: 'Tracking ID (ex: NL1232938445BR)',
                                 hintStyle: TextStyle(
                                   color: DarkTheme.terciary,
                                 ),
@@ -108,7 +115,12 @@ class _HomePageState extends State<HomePage> {
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton(
-                              onPressed: () => setState(() => homePageController.addPackage() ? Navigator.pop(context) : {}),
+                              onPressed: () => setState(() {
+                                if (homePageController.addPackage()) {
+                                  Navigator.pop(context);
+                                
+                                }
+                              }),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: DarkTheme.buttonPrimary,
                               ),
@@ -124,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               );
-            }
+            },
           ),
         );
       }
@@ -154,6 +166,7 @@ class _HomePageState extends State<HomePage> {
                     backgroundColor: DarkTheme.background,
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.all(10),
+                    elevation: 0,
                   ),
                   icon: const Icon(Icons.check_circle, size: 28, color: DarkTheme.iconPrimary),
                   label: const Text('Delivered', style: TextStyle(fontSize: 16)),
@@ -185,7 +198,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 10),
             ],
             title: const Text(
-              'My Pack',
+              'Packages',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -194,26 +207,20 @@ class _HomePageState extends State<HomePage> {
             ),
             backgroundColor: DarkTheme.foreground,
           ),
-          body: RefreshIndicator(
-            onRefresh: () => Future<void>.delayed(const Duration(seconds: 3)),
-            backgroundColor: DarkTheme.background,
-            color: DarkTheme.primary,
-            child: ListView(
-              padding: const EdgeInsets.all(5),
-              children: [
-                if (packagesController.packages.isNotEmpty) ...[
-                  for (var package in packagesController.packages.reversed)
-                    PackageWidget(
-                      name: package.name,
-                      id: package.id,
-                      description: package.description,
-                      created: package.created,
-                      delivered: package.delivered,
-                      icon: const Icon(Icons.pending, color: DarkTheme.iconPrimary),
-                    ),
-                ] else ...[ const EmptyWidget() ],
-              ],
-            ),
+          body: ListView(
+            padding: const EdgeInsets.all(5),
+            children: [
+              if (packages.isNotEmpty) ...[
+                for (var package in packages.reversed)
+                PackageWidget(
+                  name: package['name'],
+                  id: package['id'],
+                  description: package['description'],
+                  delivered: package['delivered'],
+                  lastUpdate: package['lastUpdate'],
+                ),
+              ] else ... [ const EmptyWidget() ],
+            ],
           ),
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(bottom: 15, right: 5),

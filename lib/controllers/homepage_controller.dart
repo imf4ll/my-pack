@@ -7,34 +7,45 @@ import './packages_controller.dart';
 
 class HomePageController extends ChangeNotifier {
   static HomePageController instance = HomePageController();
+  
+  var packagesController = PackagesController.instance;
 
   String packageName = '';
   String packageID = '';
 
   bool addPackage() {
     if (packageName != '' && packageID != '') {
-      PackagesController.instance.addPackage(packageName, packageID);
-
-      packageName = '';
-      packageID = '';
-    
-      notifyListeners();
-
-      return true;
-    
-    } else {
-      HapticFeedback.vibrate();
-
-      sleep(const Duration(milliseconds: 200));
+      if (packagesController.addPackage(packageName, packageID)) {
+        packageName = '';
+        packageID = '';
       
-      HapticFeedback.vibrate();
+        notifyListeners();
+
+        return true;
+      
+      } else {
+        _vibrate();
+        
+        return false;
+      }
+
+    } else {
+      _vibrate();
 
       return false;
     }
   }
 
+  void _vibrate() {
+      HapticFeedback.vibrate();
+
+      sleep(const Duration(milliseconds: 200));
+      
+      HapticFeedback.vibrate();
+  }
+
   void removePackage(String id) {
-    PackagesController.instance.removePackage(id);
+    packagesController.removePackage(id);
 
     notifyListeners();
   }

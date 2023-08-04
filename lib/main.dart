@@ -9,9 +9,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'My Pack',
-      home: HomePage(),
+      theme: ThemeData(
+        fontFamily: 'Poppins',
+      ),
+      home: const HomePage(),
     );
   }
 }

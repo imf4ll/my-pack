@@ -4,13 +4,16 @@ import '../themes/dark_theme.dart';
 
 import '../controllers/packages_controller.dart';
 
+import '../services/fetch_service.dart';
+
 import '../widgets/packagedetails_widget.dart';
+import '../widgets/separator_widget.dart';
 
 class PackagePage extends StatefulWidget {
   final String? name;
   final String? id;
   final String? created;
-
+  
   const PackagePage({
     super.key,
     this.name,
@@ -23,9 +26,63 @@ class PackagePage extends StatefulWidget {
 }
 
 class _PackagePageState extends State<PackagePage> {
+  var packagesController = PackagesController.instance;
+  
+  Map<String, dynamic>? package;
+  bool isLoading = true;
+  bool isDelivered = false;
+
+  void fetchPackage() => getPackage(widget.id!).then((r) => setState(() {
+      package = r;
+
+      if (r['latestTrace']['desc'] == 'Delivered') {
+        isDelivered = true;
+
+        packagesController.updateDelivered(widget.id!);
+      }
+
+      packagesController.updateDate(widget.id!, r['latestTrace']['time']);
+
+      packagesController.updateDescription(widget.id!, r['latestTrace']['standerdDesc']);
+
+      isLoading = false;
+
+  })).onError((error, stackTrace) {
+    Navigator.pop(context);
+  
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Failed to get data, try again later.'),
+    ));
+  });
+
+  @override
+  void initState() {
+    fetchPackage();
+ 
+    super.initState();
+  }
+
+  IconData setIcon(String actionCode) {
+    switch (actionCode) {
+      case 'CC_EX_START' || 'CC_EX_SUCCESS' || 'CC_IM_SUCCESS':
+        return Icons.anchor;
+
+      case 'LH_HO_AIRLINE' || 'LH_DEPART':
+        return Icons.flight_takeoff_rounded;
+
+      case 'LH_ARRIVE' || 'GTMS_ACCEPT':
+        return Icons.flight_land_rounded;
+
+      case 'GTMS_SIGNED':
+        return Icons.check_circle_rounded;
+
+      default:
+        return Icons.local_shipping_rounded;
+    }
+  }
+  
   @override
   Widget build(context) {
-    var packagesController = PackagesController.instance;
     
     return Scaffold(
       backgroundColor: DarkTheme.background,
@@ -40,24 +97,12 @@ class _PackagePageState extends State<PackagePage> {
           titleSpacing: 0,
           actions: [
             GestureDetector(
-              onTap: () => print('edit'),
-              child: const Padding(
-                padding: EdgeInsets.all(5),
-                child: Icon(Icons.edit, size: 24),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => print('refresh'),
-              child: const Padding(
-                padding: EdgeInsets.all(5),
-                child: Icon(Icons.refresh, size: 24),
-              ),
-            ),
-            GestureDetector(
               onTap: () {
                 packagesController.removePackage(widget.id!);
 
                 Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully removed.')));
               },
               child: const Padding(
                 padding: EdgeInsets.all(5),
@@ -70,11 +115,24 @@ class _PackagePageState extends State<PackagePage> {
             preferredSize: const Size.fromHeight(0),
             child: Column(
               children: [
-                const Icon(Icons.inventory_2, size: 48, color: DarkTheme.primary),
+                Icon(isDelivered ? Icons.check_circle_rounded : Icons.inventory_2, size: 48, color: DarkTheme.primary),
                 const SizedBox(height: 10),
                 Text('${ widget.id }', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: DarkTheme.primary)),
                 const SizedBox(height: 10),
-                Text('${ widget.created }', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: DarkTheme.primary)),
+                if (!isLoading) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(package!['originCountry'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: DarkTheme.primary)),
+                      const Icon(Icons.navigate_next_rounded, color: DarkTheme.iconPrimary),
+                      Text(package!['destCountry'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: DarkTheme.primary)),
+                    ],
+                  ),
+                ] else ...[ const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(color: DarkTheme.primary, strokeWidth: 3)),
+                ],
                 const SizedBox(height: 15),
               ],
             ),
@@ -82,32 +140,29 @@ class _PackagePageState extends State<PackagePage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: ListView(
-            children: const [
-            //for (var detail in details)
-            PackageDetailsWidget(
-              icon: Icon(Icons.local_shipping_rounded, size: 36, color: DarkTheme.iconPending),
-              title: 'Objeto em trânsito - por favor aguarde',
-              description: 'de Unidade de Logística Integrada, CURITIBA - PR para Unidade de Tratamento, INDAIATUBA - SP',
-              lastUpdate: 'há 3 horas',
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 30,
-              child: VerticalDivider(
-                thickness: 1.5,
-                color: DarkTheme.iconPending,
-              ),
-            ),
-            SizedBox(height: 10),
-            PackageDetailsWidget(
-              icon: Icon(Icons.local_shipping_rounded, size: 36, color: DarkTheme.iconPending),
-              title: 'Objeto em trânsito - por favor aguarde',
-              description: 'de Unidade de Logística Integrada, CURITIBA - PR para Unidade de Tratamento, INDAIATUBA - SP',
-              lastUpdate: 'há 3 horas',
-            ),
-          ],
+        padding: const EdgeInsets.only(left: 7, right: 7, top: 10),
+        child: RefreshIndicator(
+          onRefresh: () => Future<void>.microtask(() => fetchPackage()),
+          backgroundColor: DarkTheme.cardBackground,
+          color: DarkTheme.primary,
+          child: ListView(
+            children: [
+              if (!isLoading) ...[
+                for (var detail in package!['detailList']) ...[
+                  PackageDetailsWidget(
+                    icon: setIcon(detail['actionCode']),
+                    title: detail['descTitle'],
+                    description: detail['standerdDesc'],
+                    lastUpdate: detail['time'],
+                  ),
+                  const SeparatorWidget(),  
+                ],
+              ] else ...[
+                const SizedBox(height: 10),
+                const Center(child: CircularProgressIndicator(color: DarkTheme.foreground)),
+              ],
+            ],
+          ),
         ),
       ),
     );
