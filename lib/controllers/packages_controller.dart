@@ -7,6 +7,9 @@ import '../services/vibrate_service.dart';
 
 class PackagesController extends ChangeNotifier {
   static PackagesController instance = PackagesController();
+  
+  var storageService = StorageService();
+  var vibrateService = VibrateService();
 
   List packages = [];
 
@@ -28,9 +31,9 @@ class PackagesController extends ChangeNotifier {
         lastUpdate: 'Just now',
       ).toJson());
 
-      storePackages(packages);
+      storageService.storePackages(packages);
       
-      vibrateDelete();
+      vibrateService.vibrateDelete();
 
       notifyListeners();
       
@@ -43,9 +46,9 @@ class PackagesController extends ChangeNotifier {
   void removePackage(String id) {
     packages.removeWhere((i) => i['id'] == id);
     
-    storePackages(packages);
+    storageService.storePackages(packages);
     
-    vibrateDelete();
+    vibrateService.vibrateDelete();
 
     notifyListeners();
   }
@@ -53,7 +56,7 @@ class PackagesController extends ChangeNotifier {
   void updateDescription(String id, String description) {
     packages[packages.indexWhere((i) => i['id'] == id)]['description'] = description;
     
-    storePackages(packages);
+    storageService.storePackages(packages);
 
     notifyListeners();
   }
@@ -61,7 +64,7 @@ class PackagesController extends ChangeNotifier {
   void updateDelivered(String id) {
     packages[packages.indexWhere((i) => i['id'] == id)]['delivered'] = true;
 
-    storePackages(packages);
+    storageService.storePackages(packages);
 
     notifyListeners();
   }
@@ -69,20 +72,20 @@ class PackagesController extends ChangeNotifier {
   void updateDate(String id, int timestamp) {
     packages[packages.indexWhere((i) => i['id'] == id)]['lastUpdate'] = _since(timestamp);
 
-    storePackages(packages);
+    storageService.storePackages(packages);
 
     notifyListeners();
   }
-}
 
-String _since(int timestamp) {
-  int difference = DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(timestamp)).inMinutes;
+  String _since(int timestamp) {
+    int difference = DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(timestamp)).inMinutes;
 
-  switch (difference) {
-    case > 60 * 24: return '${ (difference / 24 / 60).round() } days ago';
+    switch (difference) {
+      case > 60 * 24: return '${ (difference / 24 / 60).round() } days ago';
 
-    case > 60: return '${ (difference / 60).round() } hours ago';
-    
-    default: return '$difference minutes ago';
+      case > 60: return '${ (difference / 60).round() } hours ago';
+      
+      default: return '$difference minutes ago';
+    }
   }
 }

@@ -27,11 +27,13 @@ class PackagePage extends StatefulWidget {
 
 class _PackagePageState extends State<PackagePage> {
   var packagesController = PackagesController.instance;
+  var fetchService = FetchService();
+
   Map<String, dynamic>? package;
   bool isLoading = true;
   bool isDelivered = false;
 
-  void fetchPackage() => getPackage(widget.id!).then((r) => setState(() {
+  void fetchPackage() => fetchService.getPackage(widget.id!).then((r) => setState(() {
       package = r;
 
       if (r['latestTrace']['desc'] == 'Delivered') {
@@ -87,12 +89,10 @@ class _PackagePageState extends State<PackagePage> {
   Widget build(context) {
     
     return Scaffold(
-      backgroundColor: DarkTheme.background,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(200),
         child: AppBar(
           title: Text('${ widget.name }'),
-          backgroundColor: DarkTheme.foreground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
           ),

@@ -14,14 +14,13 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  String query = '';
+  TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(context) {
     var packagesController = PackagesController.instance;
 
     return Scaffold(
-      backgroundColor: DarkTheme.background,
       appBar: AppBar(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -29,6 +28,7 @@ class _SearchPageState extends State<SearchPage> {
         title: Padding(
           padding: const EdgeInsets.only(right: 15),
           child: TextField(
+            controller: searchController,
             maxLines: 1,
             maxLength: 30,
             decoration: const InputDecoration(
@@ -40,7 +40,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             style: const TextStyle(fontSize: 18, color: DarkTheme.primary),
             textAlign: TextAlign.center,
-            onChanged: (value) => setState(() => query = value),
+            onChanged: (value) => setState(() => {}),
           ),
         ),
         centerTitle: true,
@@ -52,12 +52,13 @@ class _SearchPageState extends State<SearchPage> {
           ),
           const SizedBox(width: 15),
         ],
-        backgroundColor: DarkTheme.foreground,
       ),
       body: ListView(
         padding: const EdgeInsets.all(10),
         children: [
-           for (var package in packagesController.packages.reversed.where((i) => i['name']!.toLowerCase().contains(query) || i['id'].toLowerCase().contains(query)))
+          for (var package in packagesController.packages.reversed.where((i) =>
+            i['name']!.toLowerCase().contains(searchController.text) || i['id'].toLowerCase().contains(searchController.text))
+          )
             PackageWidget(
               name: package['name'],
               id: package['id'],

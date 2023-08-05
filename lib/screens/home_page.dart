@@ -23,6 +23,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var packagesController = PackagesController.instance;
+  var storageService = StorageService();
+  var vibrateService = VibrateService();
 
   TextEditingController packageNameController = TextEditingController();
   TextEditingController packageIDController = TextEditingController();
@@ -31,9 +33,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    createStorage();
+    storageService.createStorage();
 
-    getPackages().then((r) => setState(() {
+    storageService.getPackages().then((r) => setState(() {
       packages = r!;
 
       packagesController.setPackages(r);
@@ -54,12 +56,12 @@ class _HomePageState extends State<HomePage> {
         Navigator.pop(context);
 
       } else {
-        vibrateError();
+        vibrateService.vibrateError();
 
       }
     
     } else {
-      vibrateError();
+      vibrateService.vibrateError();
 
     }
   }
@@ -71,14 +73,12 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
       ),
       isScrollControlled: true,
-      backgroundColor: DarkTheme.background,
       builder: (context) {
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
           child: BottomSheet(
             onClosing: () => {},
             constraints: const BoxConstraints(maxHeight: 275),
-            backgroundColor: Colors.transparent,
             builder: (context) {
               return Container(
                 alignment: Alignment.center,
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.only(left: 20),
                         child: const Row(
                           children: [
-                            Icon(Icons.local_shipping_rounded, color: DarkTheme.iconPrimary, size: 32),
+                            Icon(Icons.local_shipping_rounded, color: DarkTheme.iconPrimary, size: 28),
                             SizedBox(width: 10),
                             Text('Add package', style: TextStyle(color: DarkTheme.primary, fontWeight: FontWeight.w600, fontSize: 18)),
                           ],  
@@ -170,9 +170,7 @@ class _HomePageState extends State<HomePage> {
         return Scaffold(
           drawerEnableOpenDragGesture: true,
           drawerEdgeDragWidth: MediaQuery.of(context).size.width,
-          backgroundColor: DarkTheme.background,
           drawer: Drawer(
-            backgroundColor: DarkTheme.background,
             child: ListView(
               padding: const EdgeInsets.only(left: 10, right: 10),
               children: [
@@ -226,7 +224,6 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 20,
               ),
             ),
-            backgroundColor: DarkTheme.foreground,
           ),
           body: ListView(
             padding: const EdgeInsets.all(10),

@@ -34,13 +34,11 @@ class PackageWidget extends StatelessWidget {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
         ),
-        backgroundColor: DarkTheme.background,
         isScrollControlled: true,
         builder: (context) {
           return BottomSheet(
             onClosing: () => {},
             constraints: const BoxConstraints(maxHeight: 50),
-            backgroundColor: Colors.transparent,
             builder: (context) {
               return ListView(
                 physics: const ScrollPhysics(),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../themes/dark_theme.dart';
-
 import '../controllers/packages_controller.dart';
 
 import '../widgets/package_widget.dart';
@@ -23,14 +21,12 @@ class _DeliveredPageState extends State<DeliveredPage> {
       animation: packagesController,
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: DarkTheme.background,
           appBar: AppBar(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5),
             ),
             title: const Text('Delivered'),
             titleSpacing: 0,
-            backgroundColor: DarkTheme.foreground,
           ),
           body: ListView(
             padding: const EdgeInsets.all(10),

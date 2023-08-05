@@ -11,10 +11,10 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(context) {
+    var storageService = StorageService();
     var packagesController = PackagesController.instance;
 
     return Scaffold(
-      backgroundColor: DarkTheme.background,
       appBar: AppBar(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -28,7 +28,6 @@ class SettingsPage extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        backgroundColor: DarkTheme.foreground,
         actions: const [
           Center(child: Padding(
             padding: EdgeInsets.only(right: 15),
@@ -58,7 +57,7 @@ class SettingsPage extends StatelessWidget {
                       const Text('Clear storage', style: TextStyle(fontSize: 18, color: DarkTheme.primary, fontWeight: FontWeight.w500)),
                       ElevatedButton(
                         onPressed: () {
-                          clearStorage().then((_) {
+                          storageService.clearStorage().then((_) {
                             packagesController.clearPackages();
 
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
