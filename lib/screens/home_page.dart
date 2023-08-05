@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/packages_controller.dart';
-import '../controllers/homepage_controller.dart';
 
 import './search_page.dart';
 import './delivered_page.dart';
@@ -13,6 +12,7 @@ import '../widgets/empty_widget.dart';
 import '../themes/dark_theme.dart';
 
 import '../services/storage_service.dart';
+import '../services/vibrate_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ super.key });
@@ -23,7 +23,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var packagesController = PackagesController.instance;
-  var homePageController = HomePageController.instance;
+
+  TextEditingController packageNameController = TextEditingController();
+  TextEditingController packageIDController = TextEditingController();
 
   List packages = [];
 
@@ -38,6 +40,28 @@ class _HomePageState extends State<HomePage> {
     }));
 
     super.initState();
+  }
+
+  void addPackage() {
+    var packageName = packageNameController.text;
+    var packageID = packageIDController.text;
+
+    if (packageName != '' && packageID != '') {
+      if (packagesController.addPackage(packageNameController.text, packageIDController.text)) {
+        packageNameController.clear();
+        packageIDController.clear();
+        
+        Navigator.pop(context);
+
+      } else {
+        vibrateError();
+
+      }
+    
+    } else {
+      vibrateError();
+
+    }
   }
 
   void showAddModal() {
@@ -79,6 +103,7 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           children: [
                             TextField(
+                              controller: packageNameController,
                               decoration: const InputDecoration(
                               hintText: 'Description',
                                 hintStyle: TextStyle(
@@ -92,11 +117,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
-                              onChanged: (value) => setState(() => homePageController.packageName = value),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),
                             TextField(
+                              controller: packageIDController,
                               decoration: const InputDecoration(
                                 hintText: 'Tracking ID (ex: NL1232938445BR)',
                                 hintStyle: TextStyle(
@@ -110,17 +135,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
-                              onChanged: (value) => setState(() => homePageController.packageID = value),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton(
-                              onPressed: () => setState(() {
-                                if (homePageController.addPackage()) {
-                                  Navigator.pop(context);
-                                
-                                }
-                              }),
+                              onPressed: () => addPackage(),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: DarkTheme.buttonPrimary,
                               ),
@@ -146,9 +165,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(context) { 
     return AnimatedBuilder(
-      animation: Listenable.merge(
-        [ homePageController, packagesController ],
-      ),
+      animation: packagesController, 
       builder: (context, child) {
         return Scaffold(
           drawerEnableOpenDragGesture: true,
@@ -216,14 +233,17 @@ class _HomePageState extends State<HomePage> {
             children: [
               if (packages.isNotEmpty) ...[
                 for (var package in packages.reversed)
-                PackageWidget(
-                  name: package['name'],
-                  id: package['id'],
-                  description: package['description'],
-                  delivered: package['delivered'],
-                  lastUpdate: package['lastUpdate'],
-                  created: package['created'],
-                ),
+                  ...[
+                    PackageWidget(
+                      name: package['name'],
+                      id: package['id'],
+                      description: package['description'],
+                      delivered: package['delivered'],
+                      lastUpdate: package['lastUpdate'],
+                      created: package['created'],
+                    ),
+                    const SizedBox(height: 10),
+                  ]
               ] else ... [ const EmptyWidget() ],
             ],
           ),

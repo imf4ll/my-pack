@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../models/package_model.dart';
 
 import '../services/storage_service.dart';
+import '../services/vibrate_service.dart';
 
 class PackagesController extends ChangeNotifier {
   static PackagesController instance = PackagesController();
@@ -30,7 +30,7 @@ class PackagesController extends ChangeNotifier {
 
       storePackages(packages);
       
-      HapticFeedback.vibrate();
+      vibrateDelete();
 
       notifyListeners();
       
@@ -45,7 +45,7 @@ class PackagesController extends ChangeNotifier {
     
     storePackages(packages);
     
-    HapticFeedback.vibrate();
+    vibrateDelete();
 
     notifyListeners();
   }

@@ -10,7 +10,7 @@ class EmptyWidget extends StatefulWidget {
 }
 
 class _EmptyWidgetState extends State<EmptyWidget> {
-  double margin = 0;
+  double margin = 50;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _EmptyWidgetState extends State<EmptyWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 800),
       margin: EdgeInsets.only(top: margin),
-      curve: Curves.easeInOut,
+      curve: Curves.easeInToLinear,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
