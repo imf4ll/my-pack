@@ -231,8 +231,8 @@ class _HomePageState extends State<HomePage> {
           body: ListView(
             padding: const EdgeInsets.all(10),
             children: [
-              if (packages.isNotEmpty) ...[
-                for (var package in packages.reversed)
+              if (packages.where((i) => i['delivered'] == false) .isNotEmpty) ...[
+                for (var package in packages.where((i) => i['delivered'] == false).toList().reversed)
                   ...[
                     PackageWidget(
                       name: package['name'],
