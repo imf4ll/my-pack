@@ -1,6 +1,7 @@
 class PackageModel {
   final String? name;
   final String? id;
+  final int created = DateTime.now().millisecondsSinceEpoch;
   bool? delivered;
   String? description;
   String? lastUpdate;
@@ -19,5 +20,6 @@ class PackageModel {
     'id': id,
     'delivered': delivered,
     'lastUpdate': lastUpdate,
+    'created': created,
   };
 }

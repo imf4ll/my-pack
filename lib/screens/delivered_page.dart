@@ -33,7 +33,7 @@ class _DeliveredPageState extends State<DeliveredPage> {
             backgroundColor: DarkTheme.foreground,
           ),
           body: ListView(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(10),
             children: [
               if (packagesController.packages.where((i) => i['delivered']).isNotEmpty) ...[
                 for (var package in packagesController.packages.reversed.where((i) => i['delivered']))
@@ -42,6 +42,7 @@ class _DeliveredPageState extends State<DeliveredPage> {
                     id: package['id'],
                     description: package['description'],
                     delivered: package['delivered'],
+                    lastUpdate: package['lastUpdate'],
                   ),  
                 ] else ...[ const EmptyWidget() ],
             ],

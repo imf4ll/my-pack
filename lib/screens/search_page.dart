@@ -55,7 +55,7 @@ class _SearchPageState extends State<SearchPage> {
         backgroundColor: DarkTheme.foreground,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(10),
         children: [
            for (var package in packagesController.packages.reversed.where((i) => i['name']!.toLowerCase().contains(query) || i['id'].toLowerCase().contains(query)))
             PackageWidget(
@@ -63,6 +63,7 @@ class _SearchPageState extends State<SearchPage> {
               id: package['id'],
               description: package['description'],
               delivered: package['delivered'],
+              lastUpdate: package['lastUpdate'],
             ),
         ],
       ),

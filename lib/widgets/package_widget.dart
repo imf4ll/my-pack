@@ -12,6 +12,7 @@ class PackageWidget extends StatelessWidget {
   final String? description;
   final String? lastUpdate;
   final bool? delivered;
+  final int? created;
 
   const PackageWidget({
     super.key,
@@ -20,6 +21,7 @@ class PackageWidget extends StatelessWidget {
     this.description,
     this.delivered,
     this.lastUpdate,
+    this.created,
   });
 
   @override
@@ -37,31 +39,28 @@ class PackageWidget extends StatelessWidget {
         builder: (context) {
           return BottomSheet(
             onClosing: () => {},
-            constraints: const BoxConstraints(maxHeight: 60),
+            constraints: const BoxConstraints(maxHeight: 50),
             backgroundColor: Colors.transparent,
             builder: (context) {
-              return Column(
-                mainAxisSize: MainAxisSize.max,
+              return ListView(
+                physics: const ScrollPhysics(),
                 children: [
-                  const SizedBox(height: 5),
-                  GestureDetector(
-                    onTap: () {
+                  ElevatedButton.icon(
+                    onPressed: () {
                       packagesController.removePackage(id!);
 
                       Navigator.pop(context);
 
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully removed.')));
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_rounded, size: 24, color: DarkTheme.buttonRed),
-                          SizedBox(width: 10),
-                          Text('Delete', style: TextStyle(fontWeight: FontWeight.w500, color: DarkTheme.buttonRed, fontSize: 18)),
-                        ],
-                      ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                     ),
+                    icon: const Icon(Icons.delete_rounded, size: 24, color: DarkTheme.buttonRed),
+                    label: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w500, color: DarkTheme.buttonRed, fontSize: 16)),
                   ),
                 ],
               );
@@ -71,64 +70,61 @@ class PackageWidget extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
-      onTap: () {
+    return ElevatedButton(
+      onPressed: () => {
         Navigator.push(context, MaterialPageRoute(builder: (context) =>
-          PackagePage(name: name, id: id)),
-        );
+          PackagePage(name: name, id: id, created: created)),
+        )
       },
       onLongPress: () => showPackageModal(),
-      child: Card(
-        color: DarkTheme.cardBackground,
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: DarkTheme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+        padding: const EdgeInsets.only(top: 10, bottom: 10, left: 12.5, right: 12.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Icon(delivered! ? Icons.check_circle : Icons.pending, color: DarkTheme.iconPrimary, size: 20),
+              const SizedBox(width: 7),
               Text(
                 '$name · $id',
                 style: const TextStyle(
-                  color: DarkTheme.terciary,
+                  color: DarkTheme.secondary,
                   fontWeight: FontWeight.w500,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 20,
-                    child: Text(
-                      description!,
-                      style: const TextStyle(
-                        color: DarkTheme.primary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 2,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Spacer(),
-                  delivered! ? const Icon(Icons.check_circle, color: DarkTheme.iconPrimary) : const Icon(Icons.pending, color: DarkTheme.iconPrimary),
-                ],
-              ),
-              const SizedBox(height: 15),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  lastUpdate!,
-                  style: const TextStyle(
-                    color: DarkTheme.terciary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+            ]
           ),
-        ),
+          const SizedBox(height: 15),
+          Text(
+            description!,
+            style: const TextStyle(
+              color: DarkTheme.primary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              lastUpdate!,
+              style: const TextStyle(
+                color: DarkTheme.terciary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

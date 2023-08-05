@@ -5,6 +5,7 @@ import '../controllers/homepage_controller.dart';
 
 import './search_page.dart';
 import './delivered_page.dart';
+import './settings_page.dart';
 
 import '../widgets/package_widget.dart';
 import '../widgets/empty_widget.dart';
@@ -28,7 +29,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    //clearStorage();
     createStorage();
 
     getPackages().then((r) => setState(() {
@@ -151,6 +151,8 @@ class _HomePageState extends State<HomePage> {
       ),
       builder: (context, child) {
         return Scaffold(
+          drawerEnableOpenDragGesture: true,
+          drawerEdgeDragWidth: MediaQuery.of(context).size.width,
           backgroundColor: DarkTheme.background,
           drawer: Drawer(
             backgroundColor: DarkTheme.background,
@@ -171,8 +173,11 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.check_circle, size: 28, color: DarkTheme.iconPrimary),
                   label: const Text('Delivered', style: TextStyle(fontSize: 16)),
                 ),
+                const SizedBox(height: 5),
                 ElevatedButton.icon(
-                  onPressed: () => {},
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => const SettingsPage(),
+                  )),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: DarkTheme.background,
                     alignment: Alignment.centerLeft,
@@ -181,7 +186,6 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.settings_rounded, size: 28, color: DarkTheme.iconPrimary),
                   label: const Text('Settings', style: TextStyle(fontSize: 16)),
                 ),
-
               ],
             ),
           ),
@@ -208,7 +212,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: DarkTheme.foreground,
           ),
           body: ListView(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(10),
             children: [
               if (packages.isNotEmpty) ...[
                 for (var package in packages.reversed)
@@ -218,6 +222,7 @@ class _HomePageState extends State<HomePage> {
                   description: package['description'],
                   delivered: package['delivered'],
                   lastUpdate: package['lastUpdate'],
+                  created: package['created'],
                 ),
               ] else ... [ const EmptyWidget() ],
             ],

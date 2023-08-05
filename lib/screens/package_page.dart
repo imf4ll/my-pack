@@ -12,7 +12,7 @@ import '../widgets/separator_widget.dart';
 class PackagePage extends StatefulWidget {
   final String? name;
   final String? id;
-  final String? created;
+  final int? created;
   
   const PackagePage({
     super.key,
@@ -64,6 +64,9 @@ class _PackagePageState extends State<PackagePage> {
 
   IconData setIcon(String actionCode) {
     switch (actionCode) {
+      case 'PU_PICKUP_SUCCESS' || 'SC_INBOUND_SUCCESS' || 'SC_OUTBOUND_SUCCESS' || 'GWMS_ACCEPT' || 'GWMS_PACKAGE' || 'GWMS_OUTBOUND':
+        return Icons.warehouse;
+
       case 'CC_EX_START' || 'CC_EX_SUCCESS' || 'CC_IM_SUCCESS':
         return Icons.anchor;
 
@@ -139,30 +142,32 @@ class _PackagePageState extends State<PackagePage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 7, right: 7, top: 10),
-        child: RefreshIndicator(
-          onRefresh: () => Future<void>.microtask(() => fetchPackage()),
-          backgroundColor: DarkTheme.cardBackground,
-          color: DarkTheme.primary,
-          child: ListView(
-            children: [
-              if (!isLoading) ...[
-                for (var detail in package!['detailList']) ...[
-                  PackageDetailsWidget(
-                    icon: setIcon(detail['actionCode']),
-                    title: detail['descTitle'],
-                    description: detail['standerdDesc'],
-                    lastUpdate: detail['time'],
-                  ),
-                  const SeparatorWidget(),  
-                ],
-              ] else ...[
-                const SizedBox(height: 10),
-                const Center(child: CircularProgressIndicator(color: DarkTheme.foreground)),
+      body: RefreshIndicator(
+        onRefresh: () => Future<void>.microtask(() => fetchPackage()),
+        backgroundColor: DarkTheme.cardBackground,
+        color: DarkTheme.primary,
+        child: ListView(
+          padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 15),
+          children: [
+            if (!isLoading) ...[
+              for (var detail in package!['detailList']) ...[
+                PackageDetailsWidget(
+                  icon: setIcon(detail['actionCode']),
+                  description: detail['standerdDesc'],
+                  lastUpdate: detail['time'],
+                ),
+                const SeparatorWidget(),
               ],
+              PackageDetailsWidget(
+                icon: Icons.add_rounded,
+                description: 'Package added',
+                lastUpdate: widget.created,
+              ),
+            ] else ...[
+              const SizedBox(height: 10),
+              const Center(child: CircularProgressIndicator(color: DarkTheme.primary)),
             ],
-          ),
+          ],
         ),
       ),
     );

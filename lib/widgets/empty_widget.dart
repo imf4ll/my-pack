@@ -2,13 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../themes/dark_theme.dart';
 
-class EmptyWidget extends StatelessWidget {
+class EmptyWidget extends StatefulWidget {
   const EmptyWidget({ super.key });
 
   @override
+  State createState() => _EmptyWidgetState();
+}
+
+class _EmptyWidgetState extends State<EmptyWidget> {
+  double margin = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() => margin = 100);
+
+    }); 
+  }
+
+  @override
   Widget build(context) {
-    return Center(
-      heightFactor: 2.5,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 800),
+      margin: EdgeInsets.only(top: margin),
+      curve: Curves.easeInOut,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

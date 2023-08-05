@@ -10,6 +10,12 @@ class PackagesController extends ChangeNotifier {
 
   List packages = [];
 
+  void clearPackages() {
+    packages = [];
+
+    notifyListeners();
+  }
+
   void setPackages(List pkgs) => packages = pkgs;
 
   bool addPackage(String packageName, String packageID) {
